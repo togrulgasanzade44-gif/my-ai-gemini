@@ -3,511 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Omni-Intelligence v3.0</title>
+    <title>Gemini Omni Pro v3.5</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
-
         :root {
-            --bg-main: #0b0d11;
+            --bg-dark: #0b0d11;
             --bg-sidebar: #15191f;
-            --bg-chat: #1b2028;
+            --bg-card: #1b2028;
             --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.4);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
             --border: #2d3748;
-            --radius-lg: 20px;
-            --radius-sm: 12px;
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 18px; /* Твой любимый радиус */
         }
 
-        .light-theme {
-            --bg-main: #f1f5f9;
-            --bg-sidebar: #ffffff;
-            --bg-chat: #ffffff;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --border: #e2e8f0;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Sidebar */
+        .sidebar { width: 280px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px; transition: 0.3s; }
+        .logo { font-size: 22px; font-weight: 800; color: var(--accent); margin-bottom: 35px; display: flex; align-items: center; gap: 12px; }
+        .history-item { padding: 12px; border-radius: 12px; color: var(--text-dim); cursor: pointer; transition: 0.2s; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .history-item:hover { background: var(--border); color: white; }
 
-        body {
-            background: var(--bg-main);
-            color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-            transition: var(--transition);
-        }
+        /* Main Chat */
+        .main-chat { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .chat-header { height: 70px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 30px; justify-content: space-between; }
+        
+        .chat-box { flex: 1; padding: 40px 15%; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; scroll-behavior: smooth; }
+        
+        /* Messages */
+        .msg { max-width: 85%; padding: 16px 22px; border-radius: 22px; line-height: 1.6; font-size: 15px; position: relative; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } }
+        
+        .user-msg { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); }
+        .bot-msg { align-self: flex-start; background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+        
+        .msg-img { max-width: 250px; border-radius: 12px; margin-bottom: 10px; display: block; border: 2px solid var(--border); }
 
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 300px;
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-            z-index: 100;
-        }
+        /* Input Bar */
+        .footer { padding: 30px 15%; background: linear-gradient(transparent, var(--bg-dark) 50%); }
+        .input-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 35px; padding: 10px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
+        input { flex: 1; background: transparent; border: none; color: white; padding: 12px; outline: none; font-size: 16px; }
+        
+        .tool-btn { background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; transition: 0.2s; padding: 8px; border-radius: 50%; }
+        .tool-btn:hover { color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+        
+        .send-btn { background: var(--accent); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: 0.3s; }
+        .send-btn:hover { transform: scale(1.1); box-shadow: 0 0 15px var(--accent); }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 32px;
-        }
+        /* Preview */
+        #previewContainer { display: none; padding: 10px; position: absolute; bottom: 110px; left: 15%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 15px; }
+        #imagePreview { height: 80px; border-radius: 10px; }
 
-        .btn-new-chat {
-            background: linear-gradient(135deg, var(--accent), #2563eb);
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 12px var(--accent-glow);
-            transition: var(--transition);
-        }
+        .typing { display: flex; gap: 5px; padding: 10px; }
+        .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: blink 1.4s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
-        .btn-new-chat:hover { transform: translateY(-2px); box-shadow: 0 6px 16px var(--accent-glow); }
-
-        .chat-history {
-            flex: 1;
-            overflow-y: auto;
-            margin-top: 24px;
-        }
-
-        .history-group { margin-bottom: 20px; }
-        .history-label {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-            letter-spacing: 0.05em;
-        }
-
-        .history-item {
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-size: 14px;
-            color: var(--text-secondary);
-            transition: var(--transition);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .history-item:hover { background: var(--border); color: var(--text-primary); }
-        .history-item.active { background: rgba(59, 130, 246, 0.1); color: var(--accent); border-left: 3px solid var(--accent); }
-
-        .settings-bar {
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 18px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .icon-btn:hover { color: var(--accent); }
-
-        /* --- MAIN CHAT --- */
-        .chat-view {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .chat-header {
-            height: 70px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            padding: 0 40px;
-            justify-content: space-between;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 40px 10%;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-        }
-
-        .message-row { display: flex; flex-direction: column; animation: slideUp 0.4s ease forwards; }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 16px 24px;
-            font-size: 16px;
-            line-height: 1.6;
-            position: relative;
-        }
-
-        .user-row { align-items: flex-end; }
-        .user-message {
-            background: var(--accent);
-            color: white;
-            border-radius: 24px 24px 4px 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .bot-row { align-items: flex-start; }
-        .bot-message {
-            background: var(--bg-chat);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            border-radius: 24px 24px 24px 4px;
-        }
-
-        .message-info {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            font-weight: 500;
-        }
-
-        /* --- CODE BLOCKS --- */
-        pre {
-            background: #0d1117;
-            padding: 16px;
-            border-radius: 8px;
-            margin: 12px 0;
-            overflow-x: auto;
-            border: 1px solid #30363d;
-        }
-        code { font-family: 'Fira Code', monospace; font-size: 14px; }
-
-        /* --- INPUT AREA --- */
-        .chat-footer {
-            padding: 32px 10%;
-            background: linear-gradient(transparent, var(--bg-main) 30%);
-        }
-
-        .input-card {
-            background: var(--bg-chat);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: var(--transition);
-        }
-
-        .input-card:focus-within {
-            border-color: var(--accent);
-            box-shadow: 0 10px 40px var(--accent-glow);
-        }
-
-        #userInput {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            padding: 12px;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .btn-circle {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 18px;
-        }
-
-        .btn-tool { background: transparent; color: var(--text-secondary); }
-        .btn-tool:hover { background: var(--border); color: var(--accent); }
-
-        .btn-send {
-            background: var(--accent);
-            color: white;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        .btn-send.active { opacity: 1; pointer-events: all; }
-        .btn-send:hover { transform: scale(1.1) rotate(-10deg); }
-
-        /* --- UTILS --- */
-        .typing-indicator {
-            display: flex;
-            gap: 4px;
-            padding: 10px;
-        }
-        .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 1.4s infinite; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .chat-messages, .chat-footer { padding: 20px 5%; }
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
-        <div class="brand">
-            <i class="fas fa-bolt-lightning"></i>
-            <span>OMNI AI v3</span>
-        </div>
-
-        <button class="btn-new-chat" onclick="createNewChat()">
-            <i class="fas fa-plus"></i>
-            <span>Новый диалог</span>
-        </button>
-
-        <div class="chat-history" id="chatHistory">
-            <div class="history-group">
-                <div class="history-label">Сегодня</div>
-                <div id="historyToday"></div>
-            </div>
-        </div>
-
-        <div class="settings-bar">
-            <button class="icon-btn" title="Тема" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
-            <button class="icon-btn" title="Очистить всё" onclick="clearAllData()"><i class="fas fa-trash-can"></i></button>
-            <button class="icon-btn" title="Профиль"><i class="fas fa-user-gear"></i></button>
+        <div class="logo"><i class="fas fa-microchip"></i> Gemini Pro</div>
+        <div style="margin-top: 20px;">
+            <div class="history-item">Как написать код...</div>
+            <div class="history-item">Дизайн с закруглениями</div>
+            <div class="history-item">Голосовой поиск</div>
         </div>
     </aside>
 
-    <main class="chat-view">
+    <main class="main-chat">
         <header class="chat-header">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <div style="width: 10px; height: 10px; background: #10b981; border-radius: 50%;"></div>
-                <span style="font-weight: 600; font-size: 14px;">Система готова</span>
-            </div>
-            <div class="header-actions">
-                <i class="fas fa-share-nodes icon-btn" style="margin-right: 20px;"></i>
-                <i class="fas fa-ellipsis-v icon-btn"></i>
-            </div>
+            <span style="font-weight: 600; font-size: 14px;"><i class="fas fa-circle" style="color: #10b981; font-size: 8px; margin-right: 8px;"></i> Система активна</span>
+            <i class="fas fa-cog tool-btn"></i>
         </header>
 
-        <div class="chat-messages" id="chatMessages">
-            <div class="message-row bot-row">
-                <div class="message bot-message">
-                    Привет! Я твой новый Gemini Omni v3. Дизайн обновлен, закругления на месте (18-20px), масштаб подправлен. Жду твоих команд!
-                </div>
-                <div class="message-info">Система • Сейчас</div>
-            </div>
+        <div class="chat-box" id="chatBox">
+            <div class="msg bot-msg">Привет! Я обновил систему. Теперь <b>Enter</b> отправляет, <b>Фото</b> прикрепляется, а <b>Голос</b> слушает. Жду твой запрос!</div>
         </div>
 
-        <footer class="chat-footer">
-            <div class="input-card">
-                <button class="btn-circle btn-tool" onclick="triggerUpload()"><i class="fas fa-paperclip"></i></button>
-                <button class="btn-circle btn-tool" id="micBtn" onclick="toggleMic()"><i class="fas fa-microphone"></i></button>
-                <input type="text" id="userInput" placeholder="Спроси меня о чем угодно..." autocomplete="off">
-                <button class="btn-circle btn-send" id="sendBtn" onclick="handleSend()">
-                    <i class="fas fa-arrow-up"></i>
-                </button>
+        <div id="previewContainer">
+            <img id="imagePreview" src="">
+            <i class="fas fa-times-circle" style="position: absolute; top: -5px; right: -5px; cursor: pointer; color: #ef4444;" onclick="removeImage()"></i>
+        </div>
+
+        <footer class="footer">
+            <div class="input-container">
+                <input type="file" id="fileInput" hidden accept="image/*" onchange="handleImage(this)">
+                <button class="tool-btn" onclick="document.getElementById('fileInput').click()"><i class="fas fa-image"></i></button>
+                <button class="tool-btn" id="micBtn" onclick="startVoice()"><i class="fas fa-microphone"></i></button>
+                
+                <input type="text" id="userInput" placeholder="Спроси о чем угодно..." onkeydown="if(event.key === 'Enter') handleSend()">
+                
+                <button class="send-btn" onclick="handleSend()"><i class="fas fa-paper-plane"></i></button>
             </div>
-            <p style="text-align: center; font-size: 11px; color: var(--text-secondary); margin-top: 15px;">
-                Gemini Omni может ошибаться. Проверяйте важную информацию.
-            </p>
         </footer>
     </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <script>
-        const input = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const messagesContainer = document.getElementById('chatMessages');
-        const historyContainer = document.getElementById('historyToday');
+        // ТВОЙ НОВЫЙ КЛЮЧ
+        const API_KEY = "AIzaSyBbqJg9nqRHSH8IKnNqn75j-GgfABI6mFk"; 
+        let currentImageBase64 = null;
 
-        let isDark = true;
-        let chatHistory = JSON.parse(localStorage.getItem('chats')) || [];
-
-        // Инициализация при загрузке
-        window.onload = () => {
-            renderHistory();
-            input.focus();
-        };
-
-        // Следим за вводом для активации кнопки
-        input.addEventListener('input', () => {
-            if (input.value.trim().length > 0) {
-                sendBtn.classList.add('active');
-            } else {
-                sendBtn.classList.remove('active');
+        function handleImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentImageBase64 = e.target.result.split(',')[1];
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('previewContainer').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
             }
-        });
+        }
+
+        function removeImage() {
+            currentImageBase64 = null;
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+        }
 
         async function handleSend() {
-            const text = input.value.trim();
-            if (!text) return;
+            const text = document.getElementById('userInput').value.trim();
+            if (!text && !currentImageBase64) return;
 
-            addMessage(text, 'user');
-            input.value = '';
-            sendBtn.classList.remove('active');
+            // Отображаем сообщение пользователя
+            addMessage(text, 'user', currentImageBase64);
+            
+            // Очищаем ввод
+            document.getElementById('userInput').value = '';
+            const tempImg = currentImageBase64;
+            removeImage();
 
-            const botRow = createTypingIndicator();
-            messagesContainer.appendChild(botRow);
-            scrollDown();
+            const botMsgDiv = addMessage("Думаю...", 'bot');
 
             try {
-                // ВАЖНО: Вызываем твой серверный файл в Vercel
-                const response = await fetch('/api/chat', {
+                const parts = [{ text: text }];
+                if (tempImg) {
+                    parts.push({ inline_data: { mime_type: "image/jpeg", data: tempImg } });
+                }
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts }] })
                 });
 
                 const data = await response.json();
-                botRow.remove();
 
-                if (response.ok) {
-                    const aiText = data.candidates[0].content.parts[0].text;
-                    addMessage(aiText, 'bot');
-                    saveToHistory(text);
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    botMsgDiv.innerText = data.candidates[0].content.parts[0].text;
                 } else {
-                    addMessage("Ошибка API: Проверьте GEMINI_KEY в Vercel Settings.", 'bot', true);
+                    botMsgDiv.innerText = "Ошибка: " + (data.error ? data.error.message : "Пустой ответ от Google");
                 }
             } catch (err) {
-                botRow.remove();
-                addMessage("Ошибка связи: Бэкенд /api/chat не отвечает.", 'bot', true);
+                botMsgDiv.innerText = "Ошибка сети. Проверьте соединение.";
+                console.error(err);
             }
         }
 
-        function addMessage(text, sender, isError = false) {
-            const row = document.createElement('div');
-            row.className = `message-row ${sender}-row`;
+        function addMessage(text, sender, imgData = null) {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            div.className = `msg ${sender}-msg`;
             
-            const msg = document.createElement('div');
-            msg.className = `message ${sender}-message ${isError ? 'error-message' : ''}`;
-            
-            // Если это бот, обрабатываем Markdown
-            if (sender === 'bot') {
-                msg.innerHTML = formatAIResponse(text);
-            } else {
-                msg.innerText = text;
+            if (imgData) {
+                const img = document.createElement('img');
+                img.src = `data:image/jpeg;base64,${imgData}`;
+                img.className = 'msg-img';
+                div.appendChild(img);
             }
-
-            const info = document.createElement('div');
-            info.className = 'message-info';
-            info.innerText = sender === 'user' ? 'Вы • Сейчас' : 'Omni AI • Сейчас';
-
-            row.appendChild(msg);
-            row.appendChild(info);
-            messagesContainer.appendChild(row);
-            scrollDown();
             
-            // Подсветка кода
-            document.querySelectorAll('pre code').forEach((el) => {
-                hljs.highlightElement(el);
-            });
+            const span = document.createElement('span');
+            span.innerText = text;
+            div.appendChild(span);
+            
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return span;
         }
 
-        function formatAIResponse(text) {
-            // Простейший парсер Markdown для жирного текста и кода
-            let formatted = text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/```(\w+)?([\s\S]*?)```/g, (match, lang, code) => {
-                    return `<pre><code class="language-${lang || 'javascript'}">${code.trim()}</code></pre>`;
-                })
-                .replace(/`(.*?)`/g, '<code>$1</code>');
-            return formatted;
-        }
+        function startVoice() {
+            const micBtn = document.getElementById('micBtn');
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'ru-RU';
 
-        function createTypingIndicator() {
-            const row = document.createElement('div');
-            row.className = 'message-row bot-row';
-            row.innerHTML = `<div class="message bot-message"><div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
-            return row;
-        }
+            recognition.onstart = () => micBtn.style.color = '#ef4444';
+            recognition.onend = () => micBtn.style.color = '';
+            
+            recognition.onresult = (event) => {
+                document.getElementById('userInput').value = event.results[0][0].transcript;
+            };
 
-        function scrollDown() {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        // --- ФУНКЦИИ ИНТЕРФЕЙСА ---
-
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-            const icon = document.querySelector('.icon-btn i');
-            isDark = !isDark;
-            icon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
-        }
-
-        function createNewChat() {
-            messagesContainer.innerHTML = '';
-            addMessage("Новый диалог начат. Чем могу помочь?", 'bot');
-        }
-
-        function saveToHistory(text) {
-            const summary = text.substring(0, 30) + "...";
-            chatHistory.unshift(summary);
-            if (chatHistory.length > 10) chatHistory.pop();
-            localStorage.setItem('chats', JSON.stringify(chatHistory));
-            renderHistory();
-        }
-
-        function renderHistory() {
-            historyContainer.innerHTML = chatHistory.map(item => `
-                <div class="history-item"><i class="far fa-message"></i> ${item}</div>
-            `).join('');
-        }
-
-        function toggleMic() {
-            const btn = document.getElementById('micBtn');
-            btn.style.color = '#ef4444';
-            setTimeout(() => { btn.style.color = ''; alert('Голосовой ввод активирован (симуляция)'); }, 1000);
-        }
-
-        function triggerUpload() {
-            alert('Загрузка файлов временно доступна только в Pro-версии');
-        }
-
-        function clearAllData() {
-            if(confirm('Удалить всю историю чатов?')) {
-                localStorage.clear();
-                location.reload();
-            }
+            recognition.start();
         }
     </script>
 </body>
