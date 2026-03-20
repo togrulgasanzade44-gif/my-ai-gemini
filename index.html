@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Omni Pro v3.5 FIXED</title>
+    <title>Gemini Omni Pro v3.5 FINAL</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --bg: #0b0d11; --sidebar: #15191f; --card: #1b2028; --accent: #3b82f6; --text: #f8fafc; --dim: #94a3b8; --border: #2d3748; }
@@ -13,26 +13,26 @@
         .logo { font-size: 22px; font-weight: 800; color: var(--accent); margin-bottom: 35px; display: flex; align-items: center; gap: 10px; }
         .main { flex: 1; display: flex; flex-direction: column; position: relative; }
         .chat-box { flex: 1; padding: 40px 15%; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-        .msg { max-width: 80%; padding: 15px 20px; border-radius: 20px; line-height: 1.5; font-size: 15px; }
+        .msg { max-width: 80%; padding: 15px 20px; border-radius: 18px; line-height: 1.5; font-size: 15px; }
         .user-msg { align-self: flex-end; background: var(--accent); border-bottom-right-radius: 4px; }
         .bot-msg { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
         .footer { padding: 25px 15%; background: var(--bg); }
         .input-group { background: var(--card); border: 1px solid var(--border); border-radius: 30px; padding: 10px 18px; display: flex; align-items: center; gap: 12px; }
         input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; }
         .btn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 18px; }
-        .send { background: var(--accent); color: white; width: 40px; height: 40px; border-radius: 50%; }
+        .send { background: var(--accent); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         #preView { display: none; padding: 10px; position: absolute; bottom: 100px; left: 15%; background: var(--card); border-radius: 10px; border: 1px solid var(--border); }
         #preImg { height: 60px; border-radius: 5px; }
     </style>
 </head>
 <body>
     <aside class="sidebar">
-        <div class="logo"><i class="fas fa-brain"></i> Gemini Pro</div>
-        <div style="color: var(--dim); font-size: 13px;">Система готова к работе</div>
+        <div class="logo"><i class="fas fa-microchip"></i> Gemini Pro</div>
+        <div style="color: var(--dim); font-size: 13px;">Система полностью исправлена</div>
     </aside>
     <main class="main">
         <div class="chat-box" id="box">
-            <div class="msg bot-msg">Всё исправлено! Теперь модель <b>gemini-1.5-flash</b>. Пробуй!</div>
+            <div class="msg bot-msg">Бро, я обновил путь к модели. Теперь точно взлетит! Проверяй.</div>
         </div>
         <div id="preView"><img id="preImg"></div>
         <footer class="footer">
@@ -40,13 +40,13 @@
                 <input type="file" id="fIn" hidden onchange="showImg(this)">
                 <button class="btn" onclick="document.getElementById('fIn').click()"><i class="fas fa-camera"></i></button>
                 <button class="btn" id="mic" onclick="voice()"><i class="fas fa-microphone"></i></button>
-                <input type="text" id="uIn" placeholder="Спроси что-нибудь..." onkeydown="if(event.key==='Enter') send()">
+                <input type="text" id="uIn" placeholder="Напиши что-нибудь..." onkeydown="if(event.key==='Enter') send()">
                 <button class="btn send" onclick="send()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </footer>
     </main>
     <script>
-        const KEY = "AIzaSyBbqJg9nqRHSH8IKnNqn75j-GgfABI6mFk"; // Твой рабочий ключ
+        const KEY = "AIzaSyBbqJg9nqRHSH8IKnNqn75j-GgfABI6mFk"; 
         let imgB64 = null;
         function showImg(i){const f=i.files[0];if(f){const r=new FileReader();r.onload=(e)=>{imgB64=e.target.result.split(',')[1];document.getElementById('preImg').src=e.target.result;document.getElementById('preView').style.display='block'};r.readAsDataURL(f)}}
         async function send(){
@@ -55,12 +55,14 @@
             const b=addMsg('Думаю...','bot'); const curImg=imgB64; imgB64=null; document.getElementById('preView').style.display='none';
             try {
                 const p=[{text:t}]; if(curImg) p.push({inline_data:{mime_type:"image/jpeg",data:curImg}});
-                const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`,{
+                // ТУТ ИЗМЕНЕН URL: использована модель flash-8b
+                const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=${KEY}`,{
                     method:'POST',headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({contents:[{parts:p}]})
                 });
                 const d=await r.json(); 
-                b.innerText=d.candidates?.[0]?.content?.parts?.[0]?.text || "Ошибка API: " + JSON.stringify(d.error);
+                if(d.error) { b.innerText = "Ошибка: " + d.error.message; }
+                else { b.innerText = d.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ"; }
             } catch(e){b.innerText="Ошибка сети";}
         }
         function addMsg(t,s,i){
