@@ -18,7 +18,7 @@
             --text-dim: #94a3b8;
             --border: rgba(45, 55, 72, 0.7);
             --glass: blur(15px) saturate(180%);
-            --radius: 20px; /* Твой стандарт */
+            --radius: 20px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -34,7 +34,6 @@
             background-image: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
         }
 
-        /* SIDEBAR */
         .sidebar {
             width: 300px;
             background: var(--bg-sidebar);
@@ -74,7 +73,6 @@
         .history-item { padding: 12px; border-radius: 10px; color: var(--text-dim); cursor: pointer; transition: var(--transition); font-size: 14px; margin-bottom: 5px; }
         .history-item:hover { background: rgba(255,255,255,0.03); color: white; }
 
-        /* CHAT VIEW */
         .chat-view { flex: 1; display: flex; flex-direction: column; position: relative; }
         
         .chat-messages {
@@ -103,7 +101,6 @@
         .bot-row { align-self: flex-start; }
         .bot-message { background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
 
-        /* INPUT AREA */
         .chat-footer { padding: 30px 12%; }
         .input-card {
             background: var(--bg-card);
@@ -124,7 +121,7 @@
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        .btn-send { background: var(--accent); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .btn-send { background: var(--accent); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer;}
     </style>
 </head>
 <body>
@@ -140,14 +137,14 @@
     <main class="chat-view">
         <div class="chat-messages" id="chatBox">
             <div class="message bot-row bot-message">
-                Система исправлена! Дизайн идеален, масштаб 1:1, закругления 20px. <b>Голос</b> работает. Жду твой запрос!
+                Система готова! Я добавил проверку ответов, чтобы код не ломался. Жду твой запрос!
             </div>
         </div>
 
         <footer class="chat-footer">
             <div class="input-card">
                 <button class="btn-icon" id="micBtn" onclick="toggleVoice()"><i class="fas fa-microphone"></i></button>
-                <input type="text" id="userInput" placeholder="Напиши что-нибудь..." onkeydown="if(event.key==='Enter') send()">
+                <input type="text" id="uInp" placeholder="Напиши что-нибудь..." onkeydown="if(event.key==='Enter') send()">
                 <button class="btn-send" onclick="send()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </footer>
@@ -156,7 +153,7 @@
     <script>
         const API_KEY = "AIzaSyBbqJg9nqRHSH8IKnNqn75j-GgfABI6mFk";
         const chatBox = document.getElementById('chatBox');
-        const uInp = document.getElementById('userInput');
+        const uInp = document.getElementById('uInp');
 
         async function send() {
             const val = uInp.value.trim();
@@ -167,7 +164,7 @@
             const botMsg = addMsg("Думаю...", 'bot');
 
             try {
-                // ИСПОЛЬЗУЕМ СТАБИЛЬНУЮ ВЕРСИЮ V1
+                // Прямой вызов Gemini 1.5 Flash через стабильный v1 API
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -175,9 +172,18 @@
                 });
 
                 const data = await res.json();
-                botMsg.innerText = data.candidates[0].content.parts[0].text;
+                
+                // Проверка структуры ответа для защиты от TypeError
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                    botMsg.innerText = data.candidates[0].content.parts[0].text;
+                } else if (data.error) {
+                    botMsg.innerText = "Ошибка Google: " + data.error.message;
+                } else {
+                    botMsg.innerText = "Ответ от API не содержит текста. Проверь консоль.";
+                    console.log("Response:", data);
+                }
             } catch (e) {
-                botMsg.innerText = "Ошибка API. Проверь консоль.";
+                botMsg.innerText = "Критическая ошибка сети.";
                 console.error(e);
             }
         }
@@ -191,7 +197,6 @@
             return div;
         }
 
-        // ГОЛОСОВОЙ ВВОД
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         rec.lang = 'ru-RU';
 
