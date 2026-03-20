@@ -2,138 +2,68 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Omni Pro v3.5 FIXED FINAL</title>
+    <title>Gemini Omni Pro v3.5 (Vercel Edition)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --bg: #0b0d11; --sidebar: #15191f; --card: #1b2028; --accent: #3b82f6; --text: #f8fafc; --dim: #94a3b8; --border: #2d3748; }
+        :root { --bg: #0b0d11; --sidebar: #15191f; --card: #1b2028; --accent: #3b82f6; --text: #f8fafc; --border: #2d3748; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
-        .sidebar { width: 280px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px; }
-        .logo { font-size: 22px; font-weight: 800; color: var(--accent); margin-bottom: 35px; display: flex; align-items: center; gap: 10px; }
+        .sidebar { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 20px; }
         .main { flex: 1; display: flex; flex-direction: column; position: relative; }
-        .chat-box { flex: 1; padding: 40px 15%; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; }
-        .msg { max-width: 80%; padding: 15px 20px; border-radius: 18px; line-height: 1.5; font-size: 15px; }
+        .chat-box { flex: 1; padding: 30px 15%; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .msg { max-width: 85%; padding: 12px 18px; border-radius: 15px; font-size: 15px; line-height: 1.4; }
         .user-msg { align-self: flex-end; background: var(--accent); border-bottom-right-radius: 4px; }
         .bot-msg { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-        .footer { padding: 25px 15%; background: var(--bg); }
-        .input-group { background: var(--card); border: 1px solid var(--border); border-radius: 30px; padding: 10px 18px; display: flex; align-items: center; gap: 12px; }
-        input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; }
-        .btn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 18px; transition: 0.2s; }
-        .btn:hover { color: white; }
-        .send { background: var(--accent); color: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        #preView { display: none; padding: 10px; position: absolute; bottom: 100px; left: 15%; background: var(--card); border-radius: 12px; border: 1px solid var(--border); z-index: 100; }
-        #preImg { height: 70px; border-radius: 8px; border: 1px solid var(--border); }
+        .footer { padding: 20px 15%; background: var(--bg); }
+        .input-group { background: var(--card); border: 1px solid var(--border); border-radius: 25px; padding: 8px 15px; display: flex; align-items: center; gap: 10px; }
+        input { flex: 1; background: transparent; border: none; color: white; outline: none; }
+        .btn { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 18px; }
+        .send { background: var(--accent); color: white; width: 35px; height: 35px; border-radius: 50%; }
+        #preView { display: none; position: absolute; bottom: 90px; left: 15%; background: var(--card); padding: 5px; border-radius: 8px; border: 1px solid var(--border); }
+        #preImg { height: 50px; border-radius: 4px; }
     </style>
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="logo"><i class="fas fa-bolt"></i> Gemini Pro</div>
-        <div style="color: var(--dim); font-size: 13px; line-height: 1.4;">Версия v3.5 (Стабильная)<br>API: v1 Pro</div>
-    </aside>
+    <aside class="sidebar"><h2>Gemini Pro</h2><p style="font-size:12px; color:gray;">Proxy Mode Active</p></aside>
     <main class="main">
-        <div class="chat-box" id="box">
-            <div class="msg bot-msg">Бро, я перевел систему на <b>API v1</b>. Теперь ошибок с "модель не найдена" быть не должно. Проверяй!</div>
-        </div>
-        <div id="preView">
-            <img id="preImg">
-            <i class="fas fa-times" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border-radius:50%; width:20px; height:20px; text-align:center; font-size:12px; cursor:pointer; line-height:20px;" onclick="closeImg()"></i>
-        </div>
+        <div class="chat-box" id="box"><div class="msg bot-msg">Система запущена через Vercel API. Теперь вылетов быть не должно!</div></div>
+        <div id="preView"><img id="preImg"></div>
         <footer class="footer">
             <div class="input-group">
-                <input type="file" id="fIn" hidden onchange="showImg(this)" accept="image/*">
+                <input type="file" id="fIn" hidden onchange="showImg(this)">
                 <button class="btn" onclick="document.getElementById('fIn').click()"><i class="fas fa-camera"></i></button>
-                <button class="btn" id="mic" onclick="voice()"><i class="fas fa-microphone"></i></button>
-                <input type="text" id="uIn" placeholder="Спроси меня о чем угодно..." onkeydown="if(event.key==='Enter') send()">
+                <input type="text" id="uIn" placeholder="Напиши сообщение..." onkeydown="if(event.key==='Enter') send()">
                 <button class="btn send" onclick="send()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </footer>
     </main>
     <script>
-        const KEY = "AIzaSyBbqJg9nqRHSH8IKnNqn75j-GgfABI6mFk"; 
         let imgB64 = null;
-
         function showImg(i){
-            const f=i.files[0];
-            if(f){
-                const r=new FileReader();
-                r.onload=(e)=>{
-                    imgB64=e.target.result.split(',')[1];
-                    document.getElementById('preImg').src=e.target.result;
-                    document.getElementById('preView').style.display='block';
-                };
-                r.readAsDataURL(f);
-            }
+            const r=new FileReader();
+            r.onload=(e)=>{ imgB64=e.target.result.split(',')[1]; document.getElementById('preImg').src=e.target.result; document.getElementById('preView').style.display='block'; };
+            r.readAsDataURL(i.files[0]);
         }
-
-        function closeImg(){
-            imgB64 = null;
-            document.getElementById('preView').style.display='none';
-            document.getElementById('fIn').value = '';
-        }
-
         async function send(){
-            const t=document.getElementById('uIn').value;
-            if(!t && !imgB64) return;
-
-            addMsg(t,'user',imgB64);
-            document.getElementById('uIn').value='';
-            const b=addMsg('Думаю...','bot');
-            const curImg=imgB64;
-            closeImg();
-
+            const t=document.getElementById('uIn').value; if(!t && !imgB64) return;
+            addMsg(t,'user',imgB64); document.getElementById('uIn').value='';
+            const b=addMsg('Обработка запроса...','bot');
+            const curImg=imgB64; imgB64=null; document.getElementById('preView').style.display='none';
             try {
-                const p=[{text:t}];
-                if(curImg) p.push({inline_data:{mime_type:"image/jpeg",data:curImg}});
-
-                // ИСПОЛЬЗУЕМ ВЕРСИЮ v1 ВМЕСТО v1beta ДЛЯ СТАБИЛЬНОСТИ
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
+                const r = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: p }] })
+                    body: JSON.stringify({ prompt: t, image: curImg })
                 });
-
                 const d = await r.json();
-                
-                if (d.error) {
-                    b.innerText = "Ошибка: " + d.error.message;
-                    console.error(d.error);
-                } else {
-                    b.innerText = d.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ от системы.";
-                }
-            } catch(e) {
-                b.innerText = "Ошибка соединения. Проверь интернет.";
-                console.error(e);
-            }
+                b.innerText = d.text || "Ошибка: " + d.error;
+            } catch(e) { b.innerText = "Ошибка сервера. Проверь логи Vercel."; }
         }
-
         function addMsg(t,s,i){
-            const d=document.createElement('div');
-            d.className=`msg ${s}-msg`;
-            if(i){
-                const img=document.createElement('img');
-                img.src=`data:image/jpeg;base64,${i}`;
-                img.style.width='100%';
-                img.style.borderRadius='10px';
-                img.style.marginBottom='10px';
-                d.appendChild(img);
-            }
-            const sp=document.createElement('span');
-            sp.innerText=t;
-            d.appendChild(sp);
-            const box = document.getElementById('box');
-            box.appendChild(d);
-            box.scrollTop = box.scrollHeight;
-            return sp;
-        }
-
-        function voice(){
-            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            rec.lang='ru-RU';
-            rec.onstart=()=>document.getElementById('mic').style.color='red';
-            rec.onend=()=>document.getElementById('mic').style.color='';
-            rec.onresult=(e)=>document.getElementById('uIn').value=e.results[0][0].transcript;
-            rec.start();
+            const d=document.createElement('div'); d.className=`msg ${s}-msg`;
+            if(i){ const img=document.createElement('img'); img.src=`data:image/jpeg;base64,${i}`; img.style.width='100%'; img.style.borderRadius='8px'; d.appendChild(img); }
+            const sp=document.createElement('span'); sp.innerText=t; d.appendChild(sp);
+            document.getElementById('box').appendChild(d); document.getElementById('box').scrollTop=9999; return sp;
         }
     </script>
 </body>
